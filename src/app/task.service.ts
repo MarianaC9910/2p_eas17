@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
-import { Firestore, collection, collectionData, doc, setDoc, updateDoc, deleteDoc, docData } from '@angular/fire/firestore';
+import { Firestore, collection, collectionData, doc, setDoc, updateDoc, deleteDoc, docData, addDoc } from '@angular/fire/firestore';
 import { Observable } from 'rxjs';
 
 export interface Task {
-  id?: string;
+  id: string;
   title: string;
   description: string;
   completed: boolean;
@@ -19,30 +19,21 @@ export class TaskService {
   constructor(private firestore: Firestore) {}
 
   addTask(task: Task) {
-    const id = doc(this.taskCollection).id;
-    const newTask = { ...task, id };
-    return setDoc(doc(this.taskCollection, id), newTask);
+    return addDoc(this.taskCollection, task);
   }
 
-  // obtener tareas
   getTasks(): Observable<Task[]> {
-    return collectionData(this.taskCollection, { idField: 'id' }) as Observable<Task[]>;
+    return collectionData(this.taskCollection, { idField: 'id'}) as Observable<Task[]>;
   }
 
-  // tarea por id
-  getTaskById(id: string): Observable<Task> {
-    return docData(doc(this.firestore, `tasks/${id}`)) as Observable<Task>;
+  updateTask(id: string, data: Partial<Task>) {
+    const taskDoc = doc(this.firestore, `tasks/${id}`);
+    return updateDoc(taskDoc, data);
+    
   }
 
-  // actualizar tarea
-  updateTask(task: Task) {
-    const taskRef = doc(this.firestore, `tasks/${task.id}`);
-    return updateDoc(taskRef, { ...task });
-  }
-
-  //  Eliminar una tarea
   deleteTask(id: string) {
-    const taskRef = doc(this.firestore, `tasks/${id}`);
-    return deleteDoc(taskRef);
+    const taskDoc = doc(this.firestore, `tasks/${id}`);
+    return deleteDoc(taskDoc);
   }
 }
